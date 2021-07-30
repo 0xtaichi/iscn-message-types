@@ -19,14 +19,24 @@
     "type": "git",
     "url": "https://github.com/likecoin/iscn-message-types.git"
   },
+  "type": "module",
   "author": "Wei <wei@liker.land>",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@cosmjs/proto-signing": "^0.25.5",
+    "@cosmjs/stargate": "^0.25.5",
     "@protobuf-ts/plugin": "^1.0.13",
     "@protobuf-ts/protoc": "^1.0.13",
+    "bech32": "^2.0.0",
+    "bip32": "^2.0.6",
+    "bip39": "^3.0.4",
     "create-hash": "^1.2.0",
+    "dotenv": "^10.0.0",
     "protobufjs": "^6.11.2",
     "secp256k1": "^4.0.2",
-    "ts-proto": "^1.81.3"
+    "ts-proto": "^1.81.3",
+    "@likecoin/iscn-message-types": "^0.0.1"
+  },
+  "dependencies": {
   }
 }

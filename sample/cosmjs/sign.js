@@ -1,16 +1,17 @@
-import { OfflineSigner, Registry } from "@cosmjs/proto-signing";
+import { Registry, DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import {
   defaultRegistryTypes,
   assertIsBroadcastTxSuccess,
   SigningStargateClient,
 } from "@cosmjs/stargate";
-import { MsgCreateIscnRecord } from "../../dist/es6/iscn/tx";
+import iscn from "@likecoin/iscn-message-types";
+
+const { MsgCreateIscnRecord } = iscn.tx;
 
 const registry = new Registry([
   ...defaultRegistryTypes,
   ["/likechain.iscn.MsgCreateIscnRecord", MsgCreateIscnRecord],
 ]);
-
 
 function formatISCNPayload(payload, version = 1) {
   const {
@@ -65,28 +66,56 @@ function formatISCNPayload(payload, version = 1) {
 }
 
 export async function signISCNTx(payload, signer, address) {
-  const client = await SigningStargateClient.connectWithSigner(
-    process.env.rpcURL,
-    signer,
-    { registry }
-  );
+  console.log('process.env.rpcURL', process.env.rpcURL)
+  try {
+    // digital ocean node mnemonic
+    // const mnemonic = "person regular host recall weapon brave turn fabric turtle shoot spatial certain require donate swear buzz praise priority desk find rocket client sight special";
+    
+    // local node mnemonic
+    const mnemonic = "tell time reflect upper asset swim wasp woman hip upper portion notable ask defense scrub bullet tenant version cause essay utility kitchen until interest";
+    
+    const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic);
+    const [firstAccount] = await wallet.getAccounts();
 
-  const record = formatISCNPayload(payload);
-  const message = {
-    typeUrl: "/likechain.iscn.MsgCreateIscnRecord",
-    value: {
-      from: address,
-      record,
-    },
-  };
-  const fee = {
-    amount: [{ amount: '1000000', denom: 'nanolike' }],
-    gas: '1000000',
-  };
-  const memo = 'iscn sign';
-  const response = await client.signAndBroadcast(address, [message], fee, memo);
-  assertIsBroadcastTxSuccess(response);
-  return response;
+    console.log('wallet', wallet)
+    console.log('firstAccount', firstAccount)
+
+    const client = await SigningStargateClient.connectWithSigner(
+      "165.22.51.240:26657", //"127.0.0.1:26657",
+      wallet,//signer,
+      { registry }
+    );
+
+    console.log('client', client);
+  
+    const record = formatISCNPayload(payload);
+    console.log('record', record);
+  
+    const message = {
+      typeUrl: "/likechain.iscn.MsgCreateIscnRecord",
+      value: {
+        from: address,
+        record,
+      },
+    };
+    const fee = {
+      amount: [{ amount: '1000000', denom: 'nanolike' }],
+      gas: '1000000',
+    };
+    const memo = 'iscn sign';
+  
+    const response = await client.signAndBroadcast(address, [message], fee, memo);
+    console.log('response', response);
+    
+    assertIsBroadcastTxSuccess(response);
+    
+    return response;
+    
+  } catch (error) {
+    console.log('error', error);
+    
+  }
+  
 }
 
 export default signISCNTx;
